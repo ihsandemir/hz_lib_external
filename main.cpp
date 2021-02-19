@@ -1,17 +1,18 @@
 #include <iostream>
 
 #include <hazelcast/client/hazelcast_client.h>
+#include <hazelcast/client/topic/reliable_listener.h>
 
 int main() {
     auto hz = hazelcast::new_client().get();
 
-    auto topic = hz.get_topic("mytopic").get();
+    auto topic = hz.get_reliable_topic("mytopic").get();
 
     topic->add_message_listener(
-            hazelcast::client::topic::listener().on_received([](hazelcast::client::topic::message &&m) {
+            hazelcast::client::topic::reliable_listener(true).on_received([](hazelcast::client::topic::message &&m) {
                 std::cout << "C++ client received message for topic. Message:"
                           << m.get_message_object().get<std::string>().value() << "\n";
-            })).get();
+            }));
 
     std::cout << "Added listener\n";
     int counter = 0;
